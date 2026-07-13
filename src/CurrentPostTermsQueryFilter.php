@@ -11,34 +11,36 @@ class CurrentPostTermsQueryFilter
 {
     public static function init(): void
     {
-        add_filter('render_block_data', [self::class, 'filterBlockData'], 10, 3);
+        add_filter('render_block_context', [self::class, 'filterBlockContext'], 10, 3);
     }
 
     /**
+     * Filters the context consumed by the core/term-template renderer.
+     *
+     * @param array<string, mixed> $context
      * @param array<string, mixed> $parsed_block
-     * @param array<string, mixed> $source_block
      * @param \WP_Block|null       $parent_block
      * @return array<string, mixed>
      */
-    public static function filterBlockData(
+    public static function filterBlockContext(
+        array $context,
         array $parsed_block,
-        array $source_block,
         ?\WP_Block $parent_block,
     ): array {
-        if (($parsed_block['blockName'] ?? '') !== 'core/terms-query') {
-            return $parsed_block;
+        if (($parsed_block['blockName'] ?? '') !== 'core/term-template') {
+            return $context;
         }
 
-        $term_query = $parsed_block['attrs']['termQuery'] ?? [];
+        $term_query = $context['termQuery'] ?? [];
         if (!is_array($term_query) || empty($term_query['showCurrentPostTerms'])) {
-            return $parsed_block;
+            return $context;
         }
 
         $taxonomy = sanitize_key((string) ($term_query['taxonomy'] ?? ''));
-        $post_id = (int) get_the_ID();
+        $post_id = self::getCurrentPostId($parent_block);
 
         if (!$taxonomy || !$post_id || !taxonomy_exists($taxonomy)) {
-            return $parsed_block;
+            return $context;
         }
 
         $current_post_term_ids = wp_get_post_terms($post_id, $taxonomy, [
@@ -61,8 +63,27 @@ class CurrentPostTermsQueryFilter
         }
 
         unset($term_query['showCurrentPostTerms']);
-        $parsed_block['attrs']['termQuery'] = $term_query;
+        $context['termQuery'] = $term_query;
 
-        return $parsed_block;
+        return $context;
+    }
+
+    private static function getCurrentPostId(?\WP_Block $parent_block): int
+    {
+        if ($parent_block instanceof \WP_Block) {
+            $context_post_id = $parent_block->context['postId'] ?? 0;
+
+            if ($context_post_id) {
+                return (int) $context_post_id;
+            }
+        }
+
+        $queried_object_id = get_queried_object_id();
+
+        if ($queried_object_id) {
+            return (int) $queried_object_id;
+        }
+
+        return (int) get_the_ID();
     }
 }
