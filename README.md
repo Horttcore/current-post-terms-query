@@ -11,20 +11,27 @@ When enabled, a Terms Query block displays only terms assigned to the post curre
 
 ## Installation
 
-1. Download or clone this repository into `wp-content/plugins/current-post-terms-query`.
-2. Install the plugin dependencies if you are building from source:
+Install the plugin with Composer:
 
-   ```sh
-   npm install
-   ```
+```sh
+composer require ralfhortt/current-post-terms-query
+```
 
-3. Build the editor assets:
+Alternatively, download or clone this repository into `wp-content/plugins/current-post-terms-query`.
 
-   ```sh
-   npm run build
-   ```
+If you are building from source, install the JavaScript dependencies:
 
-4. Activate **Current Post Terms Query** in WordPress.
+```sh
+npm install
+```
+
+Build the editor assets:
+
+```sh
+npm run build
+```
+
+Finally, activate **Current Post Terms Query** in WordPress.
 
 ## Usage
 
