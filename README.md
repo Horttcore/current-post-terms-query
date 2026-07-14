@@ -41,6 +41,8 @@ Finally, activate **Current Post Terms Query** in WordPress.
 
 If the Terms Query has configured included term IDs, the result is limited to the intersection of those IDs and the current post's terms.
 
+In the Site Editor, template and template-part previews are not filtered because they do not represent a specific post. On the server, filtering only runs when an explicit `postId` is available in block context; template parts without post context remain unfiltered.
+
 ## Development
 
 Build the production editor bundle:

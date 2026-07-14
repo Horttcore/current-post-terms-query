@@ -39,7 +39,19 @@ export const withCurrentPostTermsPreview = (BlockEdit: any) => (props: any) => {
   const taxonomy = termQuery.taxonomy || "";
   const showCurrentPostTerms = Boolean(termQuery.showCurrentPostTerms);
   const currentPostId = useSelect(
-    (select: any) => select("core/editor").getCurrentPostId(),
+    (select: any) => {
+      const editorStore = select("core/editor");
+      const currentPostType = editorStore?.getCurrentPostType?.();
+
+      if (
+        currentPostType === "wp_template" ||
+        currentPostType === "wp_template_part"
+      ) {
+        return null;
+      }
+
+      return editorStore?.getCurrentPostId?.() || null;
+    },
     [],
   );
 

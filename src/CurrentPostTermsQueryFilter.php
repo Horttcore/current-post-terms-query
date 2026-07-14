@@ -37,7 +37,7 @@ class CurrentPostTermsQueryFilter
         }
 
         $taxonomy = sanitize_key((string) ($term_query['taxonomy'] ?? ''));
-        $post_id = self::getCurrentPostId($parent_block);
+        $post_id = self::getCurrentPostId($context, $parent_block);
 
         if (!$taxonomy || !$post_id || !taxonomy_exists($taxonomy)) {
             return $context;
@@ -68,8 +68,15 @@ class CurrentPostTermsQueryFilter
         return $context;
     }
 
-    private static function getCurrentPostId(?\WP_Block $parent_block): int
+    private static function getCurrentPostId(
+        array $context,
+        ?\WP_Block $parent_block,
+    ): int
     {
+        if (!empty($context['postId'])) {
+            return (int) $context['postId'];
+        }
+
         if ($parent_block instanceof \WP_Block) {
             $context_post_id = $parent_block->context['postId'] ?? 0;
 
@@ -78,12 +85,8 @@ class CurrentPostTermsQueryFilter
             }
         }
 
-        $queried_object_id = get_queried_object_id();
-
-        if ($queried_object_id) {
-            return (int) $queried_object_id;
-        }
-
-        return (int) get_the_ID();
+        // Template parts and standalone template previews do not have a
+        // reliable post context. Leave the query unfiltered in that case.
+        return 0;
     }
 }
