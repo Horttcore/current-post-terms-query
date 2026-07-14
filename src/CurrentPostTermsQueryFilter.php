@@ -85,8 +85,6 @@ class CurrentPostTermsQueryFilter
             }
         }
 
-        // Template parts and standalone template previews do not have a
-        // reliable post context. Leave the query unfiltered in that case.
-        return 0;
+        return get_the_ID();
     }
 }
